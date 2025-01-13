@@ -5,30 +5,42 @@ mod tray;
 async fn greet(name: &str) -> Result<String, InvokeError> {
     Ok(format!("Hello, {}! You've been greeted from Rust--!", name))
 }
+
+#[tauri::command]
+fn greet2(app_handle: AppHandle, name: &str) {
+    // 使用AppHandle发送消息给前端
+    app_handle.emit("message-from-backend", format!("Hello--, {}!", name)).unwrap();
+    app_handle.emit("test_event","hello").unwrap();
+}
+
+// async fn greet(name: &str) -> Result<String, InvokeError> {
+//     Ok(format!("Hello, {}! You've been greeted from Rust--!", name))
+// }
 // fn greet(name: &str) -> String {
 //     format!("Hello, {}! You've been greeted from Rust--!", name)
 // }
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, invoke])
+        .invoke_handler(tauri::generate_handler![greet, greet2, invoke])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
-use tauri::{Manager};
 use serde::{Deserialize, Serialize};
 use tauri::ipc::InvokeError;
 use tauri::menu::{Menu, MenuItem};
+use tauri::{AppHandle, Emitter, Manager, Runtime};
 
 // 定义一个结构体来表示可以调用的命令
 #[derive(Serialize, Deserialize)]
 enum CommandRequest {
-    Command1 { /* 参数 */ },
-    Command2 { /* 参数 */ },
+    Command1 {/* 参数 */},
+    Command2 {/* 参数 */},
     // ...
-    Command100 { /* 参数 */ },
+    Command100 {/* 参数 */},
 }
 
 // 定义一个结构体来表示命令的响应
@@ -64,7 +76,6 @@ async fn handle_command(request: CommandRequest) -> Result<CommandResponse, Invo
 async fn invoke(request: CommandRequest) -> Result<CommandResponse, InvokeError> {
     handle_command(request).await
 }
-
 
 fn config_menu() {
     // let  menu = Menu::new()

@@ -1,8 +1,9 @@
-use tauri::{
-    tray::{MouseButton, TrayIconBuilder, TrayIconEvent}, Emitter, Manager, Runtime
-};
-use std::thread::{sleep};
+use std::thread::sleep;
 use std::time::Duration;
+use tauri::{
+    tray::{MouseButton, TrayIconBuilder, TrayIconEvent},
+    Emitter, Manager, Runtime,
+};
 
 pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
     let _ = TrayIconBuilder::with_id("tray")
@@ -20,7 +21,9 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
                     // ...
                 }
                 MouseButton::Right {} => {
-                    tray.app_handle().emit("tray_contextmenu", position).unwrap();
+                    tray.app_handle()
+                        .emit("tray_contextmenu", position)
+                        .unwrap();
                 }
                 _ => {}
             },

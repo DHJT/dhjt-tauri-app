@@ -1,6 +1,12 @@
 <script setup>
 import { ref } from "vue";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from '@tauri-apps/api/event';
+import {
+  isPermissionGranted,
+  requestPermission,
+  sendNotification,
+} from '@tauri-apps/plugin-notification';
 
 const greetMsg = ref("");
 const name = ref("");
@@ -8,7 +14,29 @@ const name = ref("");
 async function greet() {
   // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
   greetMsg.value = await invoke("greet", { name: name.value });
+  greetMsg.value = await invoke("greet2", { name: name.value });
+  // 你有发送通知的权限吗？
+  let permissionGranted = await isPermissionGranted();
+
+  // 如果没有，我们需要请求它
+  if (!permissionGranted) {
+    const permission = await requestPermission();
+    permissionGranted = permission === 'granted';
+  }
+
+  // 一旦获得许可，我们就可以发送通知
+  if (permissionGranted) {
+    sendNotification({ title: 'Tauri', body: 'Tauri is awesome!' });
+  }
 }
+
+// 监听由后端触发的事件
+listen('message-from-backend', (message) => {
+  console.log('Received message from backend:', message.payload);
+  alert('Received message from backend:', message.payload);
+  // 在这里处理接收到的消息
+  // ...
+});
 </script>
 
 <template>
