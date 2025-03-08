@@ -5,6 +5,7 @@ use tauri::{
     Emitter, Manager, Runtime,
 };
 
+#[allow(unused)]
 pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
     let _ = TrayIconBuilder::with_id("tray")
         .tooltip("tauri")
